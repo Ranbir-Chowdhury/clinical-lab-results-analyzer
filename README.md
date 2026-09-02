@@ -242,7 +242,7 @@ From the project root:
 ``` powershell
 cd backend
 python -m venv venv
-.env\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
