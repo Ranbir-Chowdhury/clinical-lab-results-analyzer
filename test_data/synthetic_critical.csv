@@ -1,0 +1,24 @@
+test_name,value,unit
+Glucose,350.0,mg/dL
+Hemoglobin,6.2,g/dL
+WBC,35.0,10^3/uL
+Platelet Count,1200.0,10^3/uL
+Creatinine,6.5,mg/dL
+Cholesterol,450.0,mg/dL
+Ferritin,500.0,ug/L
+Glycosylated Hemoglobin (HbA1c),10.0,%
+Total IgE,180.0,KU/L
+Insulin,40.0,mU/L
+Free T4,0.5,ng/dL
+Leukocyte,20.0,10^3/uL
+RBC,2.8,10^6/uL
+RDW-SD,55.0,fL
+RDW,18.0,%
+PDW,20.0,fL
+PCT,0.1,%
+Neutrophil %,85.0,%
+Monocyte %,18.0,%
+Lymphocyte %,12.0,%
+Hematocrit,25.0,%
+pH (Strip),10.0,-
+Specific Gravity (Strip),1.04,-
