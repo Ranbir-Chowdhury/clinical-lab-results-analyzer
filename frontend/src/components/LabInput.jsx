@@ -174,20 +174,21 @@ function LabInput({ onAnalyze, loading }) {
 
   return (
     <form className="lab-input" onSubmit={handleSubmit}>
-      <div className="section-heading">
-        <div>
-          <h2>Enter Laboratory Results</h2>
-          <p>
-            Add one or more laboratory test results for AI-powered analysis.
-          </p>
-        </div>
-      </div>
+  <div className="section-heading">
+    <div>
+      <h2>Enter Laboratory Results</h2>
+    </div>
+    </div>
 
+    <div className="lab-list">
       {labs.map((lab, index) => (
-        <div className="lab-row" key={index}>
+      <div className="lab-row" key={index}>
+          <div className="test-number">
+            {String(index + 1).padStart(2, "0")}
+          </div>
+          
           <div className="field">
             <label>Test Name</label>
-
             <select
               value={lab.test_name}
               onChange={(e) =>
@@ -274,6 +275,7 @@ function LabInput({ onAnalyze, loading }) {
           {loading ? "Analyzing..." : "Analyze Results"}
         </button>
       </div>
+    </div>
     </form>
   );
 }

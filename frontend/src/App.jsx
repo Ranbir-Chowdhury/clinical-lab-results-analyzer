@@ -43,7 +43,51 @@ function App() {
     <div className="app">
       <header className="hero">
         <div className="hero-content">
-          <div className="brand-icon">+</div>
+          <div className="brand-icon">
+  <svg
+    viewBox="0 0 64 64"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-label="Clinical laboratory logo"
+    role="img"
+  >
+    <path
+      d="M25 8h14"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+
+    <path
+      d="M28 8v19L14 49c-2.5 4.5.7 10 5.9 10h24.2c5.2 0 8.4-5.5 5.9-10L36 27V8"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinejoin="round"
+    />
+
+    <path
+      d="M19 43h26"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+    />
+
+    <path
+      d="M23 37c3 2 5 2 8 0s5-2 9 0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+    />
+
+    <path
+      d="M45 17v12M39 23h12"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+    />
+  </svg>
+</div>
 
           <div>
             <h1>Clinical Lab Results Analyzer</h1>
