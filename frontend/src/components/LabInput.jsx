@@ -1,13 +1,31 @@
 import { useState } from "react";
+import Papa from "papaparse";
 
-const TEST_UNITS = {
-  Glucose: "mg/dL",
-  Hemoglobin: "g/dL",
-  WBC: "10^3/uL",
-  "Platelet Count": "10^3/uL",
-  Creatinine: "mg/dL",
-  Cholesterol: "mg/dL",
-};
+const TEST_OPTIONS = [
+  { name: "Glucose", unit: "mg/dL" },
+  { name: "Hemoglobin", unit: "g/dL" },
+  { name: "WBC", unit: "10^3/uL" },
+  { name: "Platelet Count", unit: "10^3/uL" },
+  { name: "Creatinine", unit: "mg/dL" },
+  { name: "Cholesterol", unit: "mg/dL" },
+  { name: "Ferritin", unit: "ug/L" },
+  { name: "Glycosylated Hemoglobin (HbA1c)", unit: "%" },
+  { name: "Total IgE", unit: "KU/L" },
+  { name: "Insulin", unit: "mU/L" },
+  { name: "Free T4", unit: "ng/dL" },
+  { name: "Leukocyte", unit: "10^3/uL"},
+  { name: "RBC", unit: "10^6/uL" },
+  { name: "RDW-SD", unit: "fL" },
+  { name: "RDW", unit: "%" },
+  { name: "PDW", unit: "fL" },
+  { name: "PCT", unit: "%" },
+  { name: "Neutrophil %", unit: "%" },
+  { name: "Monocyte %", unit: "%" },
+  { name: "Lymphocyte %", unit: "%" },
+  { name: "Hematocrit", unit: "%" },
+  { name: "pH (Strip)", unit: "-" },
+  { name: "Specific Gravity (Strip)", unit: "-" }
+];
 
 function LabInput({ onAnalyze, loading }) {
   const [labs, setLabs] = useState([
@@ -36,15 +54,98 @@ function LabInput({ onAnalyze, loading }) {
   };
 
   const updateLab = (index, field, value) => {
-  const updatedLabs = [...labs];
+    const updatedLabs = [...labs];
 
-  updatedLabs[index][field] = value;
+    if (field === "test_name") {
+      const selectedTest = TEST_OPTIONS.find(
+        (test) => test.name === value
+      );
 
-  if (field === "test_name") {
-    updatedLabs[index].unit = TEST_UNITS[value] || "";
+      updatedLabs[index] = {
+        ...updatedLabs[index],
+        test_name: value,
+        unit: selectedTest ? selectedTest.unit : "",
+      };
+    } else {
+      updatedLabs[index][field] = value;
+    }
+
+    setLabs(updatedLabs);
+  };
+
+  const handleCsvUpload = (event) => {
+  const file = event.target.files[0];
+
+  if (!file) {
+    return;
   }
 
-  setLabs(updatedLabs);
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+
+    complete: (results) => {
+      if (results.errors.length > 0) {
+        alert("Unable to read the CSV file. Please check its format.");
+        return;
+      }
+
+      const requiredColumns = ["test_name", "value", "unit"];
+      const headers = results.meta.fields || [];
+
+      const missingColumns = requiredColumns.filter(
+        (column) => !headers.includes(column)
+      );
+
+      if (missingColumns.length > 0) {
+        alert(
+          `CSV is missing required columns: ${missingColumns.join(", ")}`
+        );
+        return;
+      }
+
+      const parsedLabs = results.data
+        .map((row) => ({
+          test_name: row.test_name?.trim(),
+          value: row.value?.trim(),
+          unit: row.unit?.trim(),
+        }))
+        .filter(
+          (lab) =>
+            lab.test_name &&
+            lab.value !== "" &&
+            lab.unit
+        );
+
+      if (parsedLabs.length === 0) {
+        alert("No valid laboratory results were found in the CSV.");
+        return;
+      }
+
+      const invalidRows = parsedLabs.filter(
+        (lab) => Number.isNaN(Number(lab.value))
+      );
+
+      if (invalidRows.length > 0) {
+        alert("CSV contains laboratory values that are not numeric.");
+        return;
+      }
+
+      setLabs(
+        parsedLabs.map((lab) => ({
+          test_name: lab.test_name,
+          value: Number(lab.value),
+          unit: lab.unit,
+        }))
+      );
+    },
+
+    error: () => {
+      alert("Unable to read the CSV file.");
+    },
+  });
+
+  event.target.value = "";
 };
 
   const handleSubmit = (event) => {
@@ -53,14 +154,14 @@ function LabInput({ onAnalyze, loading }) {
     const validLabs = labs
       .filter(
         (lab) =>
-          lab.test_name.trim() &&
+          lab.test_name &&
           lab.value !== "" &&
-          lab.unit.trim()
+          lab.unit
       )
       .map((lab) => ({
-        test_name: lab.test_name.trim(),
+        test_name: lab.test_name,
         value: Number(lab.value),
-        unit: lab.unit.trim(),
+        unit: lab.unit,
       }));
 
     if (validLabs.length === 0) {
@@ -85,29 +186,31 @@ function LabInput({ onAnalyze, loading }) {
       {labs.map((lab, index) => (
         <div className="lab-row" key={index}>
           <div className="field">
-  <label>Test Name</label>
-  <select
-    value={lab.test_name}
-    onChange={(e) =>
-      updateLab(index, "test_name", e.target.value)
-    }
-  >
-    <option value="">Select a test</option>
-    <option value="Glucose">Glucose</option>
-    <option value="Hemoglobin">Hemoglobin</option>
-    <option value="WBC">WBC</option>
-    <option value="Platelet Count">Platelet Count</option>
-    <option value="Creatinine">Creatinine</option>
-    <option value="Cholesterol">Cholesterol</option>
-  </select>
-</div>
+            <label>Test Name</label>
+
+            <select
+              value={lab.test_name}
+              onChange={(e) =>
+                updateLab(index, "test_name", e.target.value)
+              }
+            >
+              <option value="">Select a test</option>
+
+              {TEST_OPTIONS.map((test) => (
+                <option key={test.name} value={test.name}>
+                  {test.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="field">
             <label>Value</label>
+
             <input
               type="number"
               step="any"
-              placeholder="e.g. 180"
+              placeholder="Enter value"
               value={lab.value}
               onChange={(e) =>
                 updateLab(index, "value", e.target.value)
@@ -117,13 +220,12 @@ function LabInput({ onAnalyze, loading }) {
 
           <div className="field">
             <label>Unit</label>
+
             <input
               type="text"
-              placeholder="e.g. mg/dL"
               value={lab.unit}
-              onChange={(e) =>
-                updateLab(index, "unit", e.target.value)
-              }
+              readOnly
+              placeholder="Unit"
             />
           </div>
 
@@ -137,6 +239,23 @@ function LabInput({ onAnalyze, loading }) {
           </button>
         </div>
       ))}
+      
+      <div className="csv-upload">
+        <label htmlFor="csv-file">
+          Upload CSV
+        </label>
+
+        <input
+          id="csv-file"
+          type="file"
+          accept=".csv,text/csv"
+          onChange={handleCsvUpload}
+        />
+
+        <p>
+          CSV columns: test_name, value, unit
+        </p>
+      </div>
 
       <div className="input-actions">
         <button
